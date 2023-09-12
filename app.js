@@ -13,8 +13,7 @@ const storage = multer.diskStorage({
     cb(null, path)
   },
   filename: function (req, file, cb) {
-    cb(null, file.originalname)
-    
+    cb(null, file.originalname.replace(/ /g, '_'))
   }
 })
 
@@ -24,7 +23,6 @@ var indexRouter = require('./routes/index');
 
 var app = express();
 
-// view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
 
@@ -35,15 +33,24 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
-// app.use('/website', websiteRouter);
-app.post('/website', upload.single('zip'), function(req, res, next) {
-  // res.send('respond with a resource');
-  // console.log(res)
-  // console.log(next)
-  console.log(req.file)
-  const dirName = 'uploads/' + req.file.originalname
-  decompress(dirName, dirName.replace('.zip', ''))
+
+for (const key of fs.readdirSync('uploads/')) {
+  app.use(`/${key}`, express.static(`uploads/${key}`))  
+}
+
+console.log(app)
+
+app.post('/upload', upload.single('zip'), function(req, res, next) {
+  const dirName = 'uploads/' + req.file.originalname.replace(/ /g, '_')
+  console.log(dirName)
+  const dirNameWithoutZIP = dirName.replace('.zip', '')
+  decompress(dirName, dirNameWithoutZIP)
+  fs.rmSync(dirName)
+  const name = req.file.originalname.replace(/ /g, '_').replace('.zip', '')
+  app.use(`/${name}`, express.static(dirNameWithoutZIP))
+  // this isn't working for some reason
   
+  console.log(app._router.stack)
   res.redirect('/')
 });
 

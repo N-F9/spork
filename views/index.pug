@@ -1,12 +1,16 @@
 extends layout
 
 block content
-  h1= title
-  p Welcome to #{title}
-  //- action="/website", method="post" 
-  form(action="/website", method="post" enctype="multipart/form-data" id="upload") 
+  h1 Spork
+  p A static web hosting service.
+  form(action="/upload", method="post" enctype="multipart/form-data" id="upload") 
     //- label(for="websiteName") 
     //- input(type="text" id="websiteName" name="websiteName")
     label(for="zip") 
     input(type="file" id="zip" name="zip" accept='.zip')
     button(type="submit") Submit
+  h2 Websites on Spork
+  ul(id='websites')
+    each web in websites
+      li 
+        a(href="/"+web) #{web} 
