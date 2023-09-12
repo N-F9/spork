@@ -4,7 +4,7 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
-const extract = require('extract-zip')
+const decompress = require("decompress");
 
 const multer = require('multer');
 const storage = multer.diskStorage({
@@ -14,9 +14,7 @@ const storage = multer.diskStorage({
   },
   filename: function (req, file, cb) {
     cb(null, file.originalname)
-    extract('/uploads' + file.originalname, { dir: '/uploads' + file.originalname.substring(0, file.originalname.length-4) })
-    console.log(file)
-
+    
   }
 })
 
@@ -42,7 +40,10 @@ app.post('/website', upload.single('zip'), function(req, res, next) {
   // res.send('respond with a resource');
   // console.log(res)
   // console.log(next)
-  console.log(req.files)
+  console.log(req.file)
+  const dirName = 'uploads/' + req.file.originalname
+  decompress(dirName, dirName.replace('.zip', ''))
+  
   res.redirect('/')
 });
 
