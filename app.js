@@ -34,23 +34,14 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
 
-for (const key of fs.readdirSync('uploads/')) {
-  app.use(`/${key}`, express.static(`uploads/${key}`))  
-}
-
-console.log(app)
+app.use('/', express.static('uploads/'))
 
 app.post('/upload', upload.single('zip'), function(req, res, next) {
   const dirName = 'uploads/' + req.file.originalname.replace(/ /g, '_')
-  console.log(dirName)
   const dirNameWithoutZIP = dirName.replace('.zip', '')
   decompress(dirName, dirNameWithoutZIP)
   fs.rmSync(dirName)
-  const name = req.file.originalname.replace(/ /g, '_').replace('.zip', '')
-  app.use(`/${name}`, express.static(dirNameWithoutZIP))
-  // this isn't working for some reason
   
-  console.log(app._router.stack)
   res.redirect('/')
 });
 
